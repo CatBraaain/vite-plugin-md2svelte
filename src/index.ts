@@ -3,7 +3,7 @@ import { stringifyEntities } from "stringify-entities";
 import type { Processor } from "unified";
 
 type ValidValue = string | number | boolean | Array<string | number>;
-interface Raw extends Literal {
+export interface Raw extends Literal {
   type: "raw";
   data?: Data | undefined;
 }
@@ -43,7 +43,7 @@ export function compileChildren(parent: Parents): string {
           return compileChildren(node);
         }
         case "element": {
-          return compileElement(node, parent);
+          return compileElement(node);
         }
         case "text": {
           return compileText(node, parent);
@@ -60,7 +60,7 @@ export function compileChildren(parent: Parents): string {
     .join("");
 }
 
-export function compileElement(node: Element, parent: Parents): string {
+export function compileElement(node: Element): string {
   const attributes = Object.entries(node.properties)
     .filter(([key, value]) => value !== null && value !== undefined)
     .map(([key, value]) => serializeAttribute(key, value as ValidValue))
@@ -95,6 +95,10 @@ export function serializeAttribute(key: string, value: ValidValue): string {
 
   if (value === true) {
     return key;
+  }
+
+  if (typeof value === "number") {
+    return `${key}=${value}`;
   }
 
   const stringValue = Array.isArray(value) ? value.join(" ") : String(value);
