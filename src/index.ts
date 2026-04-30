@@ -35,7 +35,7 @@ export function rehypeSveltify(this: Processor): void {
   this.compiler = (tree: Node) => compileChildren(tree as Parents);
 }
 
-function compileChildren(parent: Parents): string {
+export function compileChildren(parent: Parents): string {
   return ((parent.children ?? []) as (Root | RootContent | Raw)[])
     .map((node) => {
       switch (node.type) {
@@ -60,7 +60,7 @@ function compileChildren(parent: Parents): string {
     .join("");
 }
 
-function compileElement(node: Element, parent: Parents): string {
+export function compileElement(node: Element, parent: Parents): string {
   const attributes = Object.entries(node.properties)
     .filter(([key, value]) => value !== null && value !== undefined)
     .map(([key, value]) => serializeAttribute(key, value as ValidValue))
@@ -79,7 +79,7 @@ function compileElement(node: Element, parent: Parents): string {
   }
 }
 
-function serializeAttribute(key: string, value: ValidValue): string {
+export function serializeAttribute(key: string, value: ValidValue): string {
   if (key.startsWith("raw:")) {
     return `${key.slice("raw:".length)}=${value}`;
   }
@@ -106,7 +106,7 @@ function serializeAttribute(key: string, value: ValidValue): string {
   return `${key}="${safeValue}"`;
 }
 
-function compileText(node: Text, parent: Parents): string {
+export function compileText(node: Text, parent: Parents): string {
   const shouldEscape = !(
     parent.type === "element" &&
     (parent.tagName === "script" || parent.tagName === "style")
