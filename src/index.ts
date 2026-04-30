@@ -1,0 +1,120 @@
+import type { Data, Element, Literal, Node, Parents, Root, RootContent, Text } from "hast";
+import { stringifyEntities } from "stringify-entities";
+import type { Processor } from "unified";
+
+type ValidValue = string | number | boolean | Array<string | number>;
+interface Raw extends Literal {
+  type: "raw";
+  data?: Data | undefined;
+}
+
+const textEscapeSubset = ["<", "{", "}"];
+const attributeValueEscapeSubset = ['"', "&", "{", "}"];
+// https://developer.mozilla.org/docs/Glossary/Void_element
+const htmlVoidElements = [
+  "area",
+  "base",
+  "basefont",
+  "bgsound",
+  "br",
+  "col",
+  "command",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+];
+
+export function rehypeSveltify(this: Processor): void {
+  this.compiler = (tree: Node) => compileChildren(tree as Parents);
+}
+
+function compileChildren(parent: Parents): string {
+  return ((parent.children ?? []) as (Root | RootContent | Raw)[])
+    .map((node) => {
+      switch (node.type) {
+        case "root": {
+          return compileChildren(node);
+        }
+        case "element": {
+          return compileElement(node, parent);
+        }
+        case "text": {
+          return compileText(node, parent);
+        }
+        case "raw": {
+          return node.value;
+        }
+        default: {
+          throw new Error(`Unsupported node type: ${node.type}`);
+        }
+      }
+    })
+    .filter(Boolean)
+    .join("");
+}
+
+function compileElement(node: Element, parent: Parents): string {
+  const attributes = Object.entries(node.properties)
+    .filter(([key, value]) => value !== null && value !== undefined)
+    .map(([key, value]) => serializeAttribute(key, value as ValidValue))
+    .filter(Boolean)
+    .map((s) => ` ${s}`)
+    .join("");
+
+  const isVoidElement = htmlVoidElements.includes(node.tagName);
+  if (isVoidElement) {
+    return `<${node.tagName}${attributes} />`;
+  } else {
+    const openTag = `<${node.tagName}${attributes}>`;
+    const content = compileChildren(node);
+    const closeTag = `</${node.tagName}>`;
+    return openTag + content + closeTag;
+  }
+}
+
+function serializeAttribute(key: string, value: ValidValue): string {
+  if (key.startsWith("raw:")) {
+    return `${key.slice("raw:".length)}=${value}`;
+  }
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === false ||
+    (typeof value === "number" && Number.isNaN(value))
+  ) {
+    return "";
+  }
+
+  if (value === true) {
+    return key;
+  }
+
+  const stringValue = Array.isArray(value) ? value.join(" ") : String(value);
+  const safeValue = stringifyEntities(stringValue, {
+    useNamedReferences: true,
+    subset: attributeValueEscapeSubset,
+    attribute: true,
+  });
+  return `${key}="${safeValue}"`;
+}
+
+function compileText(node: Text, parent: Parents): string {
+  const shouldEscape = !(
+    parent.type === "element" &&
+    (parent.tagName === "script" || parent.tagName === "style")
+  );
+  return shouldEscape
+    ? stringifyEntities(node.value, {
+        useNamedReferences: true,
+        subset: textEscapeSubset,
+      })
+    : node.value;
+}

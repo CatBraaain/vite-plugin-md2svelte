@@ -2,9 +2,15 @@
   "name": "rehype-sveltify",
   "module": "src/index.ts",
   "type": "module",
+  "dependencies": {
+    "stringify-entities": "^4.0.4",
+    "unified": "^11.0.5",
+    "unist": "^0.0.1"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/hast": "^3.0.4"
   },
   "peerDependencies": {
     "typescript": "^5"
