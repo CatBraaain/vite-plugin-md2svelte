@@ -39,10 +39,11 @@ function getScriptNode(tree: Root): Element {
     {
       type: "element",
       tagName: "script",
-      properties: { lang: "ts", context: "module" },
     },
     (node) => {
-      scriptNode = node;
+      if (node.properties.lang === "ts" && node.properties.context === "module") {
+        scriptNode = node;
+      }
     },
   );
   if (scriptNode) {

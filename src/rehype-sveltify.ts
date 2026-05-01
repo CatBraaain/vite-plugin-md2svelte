@@ -75,7 +75,13 @@ export function compileElement(node: Element): string {
     const openTag = `<${node.tagName}${attributes}>`;
     const content = compileChildren(node);
     const closeTag = `</${node.tagName}>`;
-    return openTag + content + closeTag;
+    return (
+      openTag +
+      (node.tagName === "code" ? "\n" : "") +
+      content +
+      closeTag +
+      (node.tagName === "script" ? "\n" : "")
+    );
   }
 }
 
