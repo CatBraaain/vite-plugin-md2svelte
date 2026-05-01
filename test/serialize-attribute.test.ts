@@ -1,6 +1,6 @@
 import type { Properties } from "hast";
 import { describe, expect, it } from "vitest";
-import { serializeAttribute } from "../src/index.js";
+import { serializeAttribute } from "../src/rehype-sveltify.js";
 
 type TestCase = {
   input: Properties;

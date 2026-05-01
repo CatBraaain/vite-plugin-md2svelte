@@ -1,6 +1,6 @@
 import type { Parents, Root, RootContent } from "hast";
 import { describe, expect, it } from "vitest";
-import { compileChildren, type Raw } from "../src/index.js";
+import { compileChildren, type Raw } from "../src/rehype-sveltify.js";
 
 type TestCase = {
   input: (Root | RootContent | Raw)[];

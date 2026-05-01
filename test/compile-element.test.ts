@@ -1,6 +1,6 @@
 import type { Element } from "hast";
 import { describe, expect, it } from "vitest";
-import { compileElement } from "../src/index.js";
+import { compileElement } from "../src/rehype-sveltify.js";
 
 type TestCase = {
   input: Element;

@@ -1,6 +1,6 @@
 import type { Parents, Text } from "hast";
 import { describe, expect, it } from "vitest";
-import { compileText } from "../src/index.js";
+import { compileText } from "../src/rehype-sveltify.js";
 
 type TestCase = {
   parentTag: string;

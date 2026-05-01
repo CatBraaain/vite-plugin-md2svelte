@@ -1,5 +1,5 @@
 {
-  "name": "rehype-sveltify",
+  "name": "vite-plugin-md2svelte",
   "module": "src/index.ts",
   "type": "module",
   "dependencies": {

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "rehype-sveltify",
+      "name": "vite-plugin-md2svelte",
       "dependencies": {
         "stringify-entities": "^4.0.4",
         "unified": "^11.0.5",
