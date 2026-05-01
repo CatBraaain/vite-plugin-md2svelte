@@ -79,13 +79,15 @@ export function compileElement(node: Element): string {
       openTag +
       (node.tagName === "code" ? "\n" : "") +
       content +
+      (node.tagName === "script" ? "\n" : "") +
       closeTag +
       (node.tagName === "script" ? "\n" : "")
     );
   }
 }
 
-export function serializeAttribute(key: string, value: ValidValue): string {
+export function serializeAttribute(_key: string, value: ValidValue): string {
+  const key = _key.toLowerCase() === "classname" ? "class" : _key;
   if (key.startsWith("raw:")) {
     return `${key.slice("raw:".length)}=${value}`;
   }

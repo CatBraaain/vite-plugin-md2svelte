@@ -60,7 +60,7 @@ function exportMeta(frontmatter: any) {
     const scriptNode = getScriptNode(tree);
     scriptNode.children.push({
       type: "text",
-      value: `export const meta = ${uneval(frontmatter)};`,
+      value: `\nexport const meta = ${uneval(frontmatter)};`,
     });
   };
 }
@@ -76,6 +76,14 @@ function importImage() {
         tagName: "img",
       },
       (node) => {
+        try {
+          const url = new URL(node.properties.src);
+          const isRemoteSource = url.protocol === "http:" || url.protocol === "https:";
+          if (isRemoteSource) {
+            return;
+          }
+        } catch {}
+
         imagePaths.push(node.properties.src);
         delete node.properties.src;
         node.properties["raw:src"] = `{image${imagePaths.length}}`;
