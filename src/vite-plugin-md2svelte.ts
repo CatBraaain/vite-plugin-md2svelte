@@ -18,7 +18,7 @@ export function md2svelte(): Plugin {
       const { content, data: frontmatter } = matter(code);
       const file = await unified()
         .use(remarkParse)
-        .use(remarkRehype)
+        .use(remarkRehype, { allowDangerousHtml: true })
         .use(exportMeta, frontmatter)
         .use(importImage)
         // .use(importCustomComponent)

@@ -1,7 +1,32 @@
+import { compile } from "svelte/compiler";
 import { describe, expect, it } from "vitest";
 import { md2svelte } from "../src/vite-plugin-md2svelte.js";
 
 const plugin = md2svelte();
+
+function validateSvelteSyntax(code: string): { isValid: boolean; errors: string[] } {
+  try {
+    compile(code, {
+      generate: "server",
+    });
+    return {
+      isValid: true,
+      errors: [],
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        isValid: false,
+        errors: [error.message],
+      };
+    }
+    return {
+      isValid: false,
+      errors: ["Unknown compilation error"],
+    };
+  }
+}
+
 const transform = plugin.transform! as (
   code: string,
   id: string,
@@ -9,6 +34,7 @@ const transform = plugin.transform! as (
   code: string;
   map: null;
 }>;
+
 function createScriptNodeString(content?: { meta?: string; import?: string }) {
   return [
     '<script lang="ts" context="module">',
@@ -50,6 +76,7 @@ describe("File Filtering", () => {
     const result = await transform(input, id);
     if (id.endsWith(".md")) {
       expect(result.code).toBe(`${createScriptNodeString()}\n${output}`);
+      expect(validateSvelteSyntax(result.code).isValid).toBe(true);
     } else {
       expect(result).toBeUndefined();
     }
@@ -99,6 +126,7 @@ describe("Basic Markdown Transformation", () => {
   it.each(basicMarkdownTestCases)("$input", async ({ input, output }) => {
     const result = await transform(input, "test.md");
     expect(result?.code).toBe(`${createScriptNodeString()}\n${output}`);
+    expect(validateSvelteSyntax(result.code).isValid).toBe(true);
   });
 });
 
@@ -139,6 +167,7 @@ describe("Frontmatter Processing", () => {
   it.each(frontmatterTestCases)("$name", async ({ input, output }) => {
     const result = await transform(input, "test.md");
     expect(result.code).toEqual(createScriptNodeString({ meta: output }));
+    expect(validateSvelteSyntax(result.code).isValid).toBe(true);
   });
 });
 
@@ -200,6 +229,7 @@ describe("Image Import Handling", () => {
   it.each(imageHandlingTestCases)("$name", async ({ input, output }) => {
     const result = await transform(input, "test.md");
     expect(result.code).toBe(output);
+    expect(validateSvelteSyntax(result.code).isValid).toBe(true);
   });
 });
 
@@ -354,5 +384,6 @@ describe("End-to-End Integration", () => {
   it.each(integrationTestCases)("$name", async ({ input, output }) => {
     const result = await transform(input, "test.md");
     expect(result.code).toBe(output);
+    expect(validateSvelteSyntax(result.code).isValid).toBe(true);
   });
 });
