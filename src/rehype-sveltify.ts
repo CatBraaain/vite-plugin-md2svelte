@@ -78,6 +78,7 @@ export function compileElement(node: Element): string {
     return (
       openTag +
       (node.tagName === "code" ? "\n" : "") +
+      (node.tagName === "script" ? "\n" : "") +
       content +
       (node.tagName === "script" ? "\n" : "") +
       closeTag +

@@ -16,6 +16,105 @@ type Output = {
   content?: string;
 };
 
+const attributeTestCases: TestCase[] = [
+  {
+    name: "raw attribute with variable",
+    input: "<div raw:key={variableName}></div>",
+    output: { content: "<div key={variableName}></div>" },
+  },
+  {
+    name: "raw attribute with expression",
+    input: '<div raw:key="{1 + 1}"></div>',
+    output: { content: "<div key={1 + 1}></div>" },
+  },
+  {
+    name: "boolean true",
+    input: "<div hidden>key</div>",
+    output: { content: "<div hidden>key</div>" },
+  },
+  {
+    name: "string value",
+    input: '<div key="normal string"></div>',
+    output: { content: '<div key="normal string"></div>' },
+  },
+  {
+    name: "number value",
+    input: "<div key=1></div>",
+    output: { content: '<div key="1"></div>' },
+  },
+  {
+    name: "escape quotes",
+    input: "<div key='\"need escape\"'></div>",
+    output: { content: '<div key="&quot;need escape&quot;"></div>' },
+  },
+  {
+    name: "escape ampersand",
+    input: '<div key="&need escape"></div>',
+    output: { content: '<div key="&amp;need escape"></div>' },
+  },
+  {
+    name: "escape brace",
+    input: '<div key="{need escape}"></div>',
+    output: { content: '<div key="&#x7B;need escape&#x7D;"></div>' },
+  },
+];
+
+const textTestCases: TestCase[] = [
+  {
+    name: "script tag preserves braces",
+    input: '<script>const x = { y: "1" }; const a = b && c;</script>',
+    output: { content: '<script>\nconst x = { y: "1" }; const a = b && c;\n</script>' },
+  },
+  {
+    name: "style tag preserves braces",
+    input: "<style>body {color: red;}</style>",
+    output: { content: "<style>body {color: red;}</style>" },
+  },
+  {
+    name: "div preserves braces",
+    input: "<div>Hello {world}</div>",
+    output: { content: "<div>Hello &#x7B;world&#x7D;</div>" },
+  },
+  {
+    name: "div preserves ampersand",
+    input: "<div>a&b</div>",
+    output: { content: "<div>a&b</div>" },
+  },
+];
+
+const elementTestCases: TestCase[] = [
+  {
+    name: "void element",
+    input: "<br />",
+    output: { content: "<br />" },
+  },
+  {
+    name: "element with class array",
+    input: '<div class="foo 1 bar"></div>',
+    output: { content: '<div class="foo 1 bar"></div>' },
+  },
+  {
+    name: "element with text child",
+    input: "<p>Hello</p>",
+    output: { content: "<p>Hello</p>" },
+  },
+  {
+    name: "element with nested element",
+    input: "<p><span>nested</span></p>",
+    output: { content: "<p><span>nested</span></p>" },
+  },
+  {
+    name: "text with element",
+    input: "<div>Before <strong>bold</strong> after</div>",
+    output: { content: "<div>Before <strong>bold</strong> after</div>" },
+  },
+  {
+    name: "nested elements",
+    input: "<div>Text <strong>nested <em>deep</em></strong></div>",
+    output: { content: "<div>Text <strong>nested <em>deep</em></strong></div>" },
+  },
+];
+
 const fileNameTestCases: TestCase[] = [
   {
     name: "md file",
@@ -332,6 +431,9 @@ const integrationTestCases: TestCase[] = [
 ];
 
 export const testCaseGroups: TestCaseGroup[] = [
+  { groupName: "Attributes", testCases: attributeTestCases },
+  { groupName: "Text", testCases: textTestCases },
+  { groupName: "Element", testCases: elementTestCases },
   { groupName: "File Name", testCases: fileNameTestCases },
   { groupName: "Markdown", testCases: markdownTestCases },
   { groupName: "Frontmatter", testCases: frontmatterTestCases },

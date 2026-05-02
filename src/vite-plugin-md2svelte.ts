@@ -2,6 +2,7 @@ import { uneval } from "devalue";
 import matter from "gray-matter";
 import type { Element, Root, Text } from "hast";
 import { h } from "hastscript";
+import rehypeRaw from "rehype-raw";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
@@ -19,6 +20,7 @@ export function md2svelte(): Plugin {
       const file = await unified()
         .use(remarkParse)
         .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeRaw)
         .use(exportMeta, frontmatter)
         .use(importImage)
         // .use(importCustomComponent)
@@ -60,7 +62,7 @@ function exportMeta(frontmatter: any) {
     const scriptNode = getScriptNode(tree);
     scriptNode.children.push({
       type: "text",
-      value: `\nexport const meta = ${uneval(frontmatter)};`,
+      value: `export const meta = ${uneval(frontmatter)};`,
     });
   };
 }
