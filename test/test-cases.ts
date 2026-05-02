@@ -18,8 +18,13 @@ type Output = {
 
 const attributeTestCases: TestCase[] = [
   {
-    name: "raw attribute with variable",
+    name: "raw attribute with variable 1",
     input: "<div raw:key={variableName}></div>",
+    output: { content: "<div key={variableName}></div>" },
+  },
+  {
+    name: "raw attribute with variable 2",
+    input: '<div raw:key="{variableName}"></div>',
     output: { content: "<div key={variableName}></div>" },
   },
   {
@@ -83,6 +88,11 @@ const textTestCases: TestCase[] = [
 ];
 
 const elementTestCases: TestCase[] = [
+  {
+    name: "element",
+    input: "<div></div>",
+    output: { content: "<div></div>" },
+  },
   {
     name: "void element",
     input: "<br />",
@@ -280,6 +290,68 @@ const imageTestCases: TestCase[] = [
 ];
 
 const integrationTestCases: TestCase[] = [
+  {
+    name: "simple document",
+    input: [
+      "# Main Title",
+      "",
+      "## Subsection",
+      "",
+      "This is **bold** and *italic* text.",
+      "",
+      "- Item 1",
+      "- Item 2",
+      "  - Nested item",
+      "",
+      "[Link text](https://example.com)",
+    ].join("\n"),
+    output: {
+      content: [
+        "<h1>Main Title</h1>",
+        "<h2>Subsection</h2>",
+        "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>",
+        "<ul>",
+        "<li>Item 1</li>",
+        "<li>Item 2",
+        "<ul>",
+        "<li>Nested item</li>",
+        "</ul>",
+        "</li>",
+        "</ul>",
+        '<p><a href="https://example.com">Link text</a></p>',
+      ].join("\n"),
+    },
+  },
+  {
+    name: "blocks",
+    input: [
+      "> Blockquote",
+      ">> Nested blockquote",
+      ">>> Deep nested",
+      "",
+      "Code block:",
+      "```",
+      'console.log("test");',
+      "```",
+    ].join("\n"),
+    output: {
+      content: [
+        "<blockquote>",
+        "<p>Blockquote</p>",
+        "<blockquote>",
+        "<p>Nested blockquote</p>",
+        "<blockquote>",
+        "<p>Deep nested</p>",
+        "</blockquote>",
+        "</blockquote>",
+        "</blockquote>",
+        "<p>Code block:</p>",
+        "<pre><code>",
+        'console.log("test");',
+        "</code></pre>",
+      ].join("\n"),
+    },
+  },
   {
     name: "complete blog post",
     input: [
