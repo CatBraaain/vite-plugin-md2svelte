@@ -5,6 +5,7 @@ import { h } from "hastscript";
 import rehypeRaw from "rehype-raw";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
+import type { PluggableList } from "unified";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import type { Plugin } from "vite";
@@ -12,10 +13,12 @@ import { rehypeSveltify } from "./rehype-sveltify";
 
 export interface Md2svelteOptions {
   components?: Record<string, string>;
+  remarkPlugins?: PluggableList;
+  rehypePlugins?: PluggableList;
 }
 
 export function md2svelte(options: Md2svelteOptions = {}): Plugin {
-  const { components = {} } = options;
+  const { components = {}, remarkPlugins = [], rehypePlugins = [] } = options;
   return {
     name: "vite-plugin-md2svelte",
     async transform(code: string, id: string) {
@@ -24,8 +27,10 @@ export function md2svelte(options: Md2svelteOptions = {}): Plugin {
       const { content, data: frontmatter } = matter(code);
       const file = await unified()
         .use(remarkParse)
+        .use(remarkPlugins)
         .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeRaw)
+        .use(rehypePlugins)
         .use(exportMeta, frontmatter)
         .use(importImage)
         .use(customComponents, components)

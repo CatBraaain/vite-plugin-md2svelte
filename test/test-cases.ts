@@ -1,3 +1,6 @@
+import type { PluggableList } from "unified";
+import { visit } from "unist-util-visit";
+
 type TestCaseGroup = {
   groupName: string;
   testCases: TestCase[];
@@ -10,6 +13,8 @@ type TestCase = {
   output: Output | null;
   options?: {
     components?: Record<string, string>;
+    remarkPlugins?: PluggableList;
+    rehypePlugins?: PluggableList;
   };
 };
 
@@ -429,6 +434,37 @@ const customComponentTestCases: TestCase[] = [
   },
 ];
 
+const pluginTestCases: TestCase[] = [
+  {
+    name: "remark plugin",
+    input: "Hello World",
+    output: { content: "<p>Hi World</p>" },
+    options: {
+      remarkPlugins: [
+        () => (tree: any) => {
+          visit(tree, "paragraph", (node: any) => {
+            node.children[0].value = node.children[0].value.replace("Hello", "Hi");
+          });
+        },
+      ],
+    },
+  },
+  {
+    name: "rehype plugin",
+    input: "# Heading",
+    output: { content: '<h1 class="custom-heading">Heading</h1>' },
+    options: {
+      rehypePlugins: [
+        () => (tree: any) => {
+          visit(tree, { type: "element", tagName: "h1" }, (node: any) => {
+            node.properties = { class: "custom-heading" };
+          });
+        },
+      ],
+    },
+  },
+];
+
 export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Attributes", testCases: attributeTestCases },
   { groupName: "Text", testCases: textTestCases },
@@ -439,4 +475,5 @@ export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Image", testCases: imageTestCases },
   { groupName: "Integration", testCases: integrationTestCases },
   { groupName: "Custom Component", testCases: customComponentTestCases },
+  { groupName: "Plugin", testCases: pluginTestCases },
 ];
