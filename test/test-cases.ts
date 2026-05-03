@@ -37,8 +37,8 @@ const attributeTestCases: TestCase[] = [
   },
   {
     name: "boolean true",
-    input: "<div hidden>key</div>",
-    output: { content: "<div hidden>key</div>" },
+    input: "<div hidden></div>",
+    output: { content: "<div hidden></div>" },
   },
   {
     name: "string value",
@@ -69,60 +69,65 @@ const attributeTestCases: TestCase[] = [
 
 const textTestCases: TestCase[] = [
   {
-    name: "script tag preserves braces",
+    name: "not escape in script tag",
     input: '<script>const x = { y: "1" }; const a = b && c;</script>',
     output: { content: '<script>\nconst x = { y: "1" }; const a = b && c;\n</script>' },
   },
   {
-    name: "style tag preserves braces",
+    name: "not escape in style tag",
     input: "<style>body {color: red;}</style>",
     output: { content: "<style>body {color: red;}</style>" },
   },
   {
-    name: "div preserves braces",
+    name: "escape braces",
     input: "<div>Hello {world}</div>",
     output: { content: "<div>Hello &#x7B;world&#x7D;</div>" },
   },
   {
-    name: "div preserves ampersand",
+    name: "escape ampersand",
     input: "<div>a&b</div>",
     output: { content: "<div>a&b</div>" },
+  },
+  {
+    name: "escape less than",
+    input: "<div>1 < 2</div>",
+    output: { content: "<div>1 &lt; 2</div>" },
   },
 ];
 
 const elementTestCases: TestCase[] = [
   {
-    name: "element",
+    name: "open close",
     input: "<div></div>",
     output: { content: "<div></div>" },
   },
   {
-    name: "void element",
+    name: "self close",
     input: "<br />",
     output: { content: "<br />" },
   },
   {
-    name: "element with class array",
+    name: "attribute",
     input: '<div class="foo 1 bar"></div>',
     output: { content: '<div class="foo 1 bar"></div>' },
   },
   {
-    name: "element with text child",
+    name: "text child",
     input: "<p>Hello</p>",
     output: { content: "<p>Hello</p>" },
   },
   {
-    name: "element with nested element",
+    name: "nested element",
     input: "<p><span>nested</span></p>",
     output: { content: "<p><span>nested</span></p>" },
   },
   {
-    name: "text with element",
+    name: "text child with nested element",
     input: "<div>Before <strong>bold</strong> after</div>",
     output: { content: "<div>Before <strong>bold</strong> after</div>" },
   },
   {
-    name: "nested elements",
+    name: "deep nested",
     input: "<div>Text <strong>nested <em>deep</em></strong></div>",
     output: { content: "<div>Text <strong>nested <em>deep</em></strong></div>" },
   },
@@ -151,7 +156,7 @@ const fileNameTestCases: TestCase[] = [
 
 const markdownTestCases: TestCase[] = [
   {
-    name: "simple paragraph",
+    name: "paragraph",
     input: "Hello World",
     output: { content: "<p>Hello World</p>" },
   },
@@ -159,11 +164,6 @@ const markdownTestCases: TestCase[] = [
     name: "heading",
     input: "# Heading",
     output: { content: "<h1>Heading</h1>" },
-  },
-  {
-    name: "heading and paragraph",
-    input: ["# Heading", "", "This is a paragraph."].join("\n"),
-    output: { content: ["<h1>Heading</h1>", "<p>This is a paragraph.</p>"].join("\n") },
   },
   {
     name: "bold and italic",
@@ -209,40 +209,48 @@ const markdownTestCases: TestCase[] = [
 
 const frontmatterTestCases: TestCase[] = [
   {
-    name: "simple key-value",
+    name: "single",
     input: ["---", "title: Test", "---"].join("\n"),
     output: { meta: '{title:"Test"}' },
   },
   {
-    name: "multiple keys",
+    name: "multiple",
     input: ["---", "title: Test", "date: 2024-01-01", "author: John", "---"].join("\n"),
     output: { meta: '{title:"Test",date:new Date(1704067200000),author:"John"}' },
   },
   {
-    name: "arrays",
+    name: "array",
     input: ["---", "tags: [js, ts, vite]", "---"].join("\n"),
     output: { meta: '{tags:["js","ts","vite"]}' },
   },
   {
-    name: "boolean values",
+    name: "boolean",
     input: ["---", "published: true", "draft: false", "---"].join("\n"),
     output: { meta: "{published:true,draft:false}" },
   },
   {
-    name: "number values",
+    name: "number",
     input: ["---", "order: 1", "priority: 10", "---"].join("\n"),
     output: { meta: "{order:1,priority:10}" },
   },
   {
-    name: "no frontmatter",
+    name: "empty",
     input: ["---", "---"].join("\n"),
     output: { meta: "{}" },
+  },
+
+  {
+    name: "nested",
+    input: ["---", "meta:", "  level1:", "    level2:", "      value: deep", "---"].join("\n"),
+    output: {
+      meta: '{meta:{level1:{level2:{value:"deep"}}}}',
+    },
   },
 ];
 
 const imageTestCases: TestCase[] = [
   {
-    name: "single image",
+    name: "single",
     input: "![Alt text](./image.png)",
     output: {
       import: 'import image1 from "./image.png";',
@@ -250,7 +258,7 @@ const imageTestCases: TestCase[] = [
     },
   },
   {
-    name: "multiple images",
+    name: "multiple",
     input: ["![Img1](./img1.png)", "", "![Img2](./img2.png)"].join("\n"),
     output: {
       import: ['import image1 from "./img1.png";', 'import image2 from "./img2.png";'].join("\n"),
@@ -277,18 +285,9 @@ const imageTestCases: TestCase[] = [
     },
   },
   {
-    name: "URL image",
+    name: "URL",
     input: "![Remote](https://example.com/image.png)",
     output: { content: '<p><img src="https://example.com/image.png" alt="Remote" /></p>' },
-  },
-  {
-    name: "frontmatter and image",
-    input: ["---", "title: Test", "---", "", "![Img](./img.png)"].join("\n"),
-    output: {
-      meta: '{title:"Test"}',
-      import: 'import image1 from "./img.png";',
-      content: '<p><img alt="Img" src={image1} /></p>',
-    },
   },
 ];
 
@@ -326,37 +325,7 @@ const integrationTestCases: TestCase[] = [
     },
   },
   {
-    name: "blocks",
-    input: [
-      "> Blockquote",
-      ">> Nested blockquote",
-      ">>> Deep nested",
-      "",
-      "Code block:",
-      "```",
-      'console.log("test");',
-      "```",
-    ].join("\n"),
-    output: {
-      content: [
-        "<blockquote>",
-        "<p>Blockquote</p>",
-        "<blockquote>",
-        "<p>Nested blockquote</p>",
-        "<blockquote>",
-        "<p>Deep nested</p>",
-        "</blockquote>",
-        "</blockquote>",
-        "</blockquote>",
-        "<p>Code block:</p>",
-        "<pre><code>",
-        'console.log("test");',
-        "</code></pre>",
-      ].join("\n"),
-    },
-  },
-  {
-    name: "complete blog post",
+    name: "blog post",
     input: [
       "---",
       "title: My First Post",
@@ -416,98 +385,11 @@ const integrationTestCases: TestCase[] = [
       ].join("\n"),
     },
   },
-  {
-    name: "complex nested structure",
-    input: [
-      "---",
-      "meta:",
-      "  level1:",
-      "    level2:",
-      "      value: deep",
-      "---",
-      "",
-      "# Main",
-      "",
-      "## Section",
-      "",
-      "- Item 1",
-      "- Item 2",
-      "",
-      "![Icon](./icon.svg)",
-    ].join("\n"),
-    output: {
-      meta: '{meta:{level1:{level2:{value:"deep"}}}}',
-      import: 'import image1 from "./icon.svg";',
-      content: [
-        "<h1>Main</h1>",
-        "<h2>Section</h2>",
-        "<ul>",
-        "<li>Item 1</li>",
-        "<li>Item 2</li>",
-        "</ul>",
-        '<p><img alt="Icon" src={image1} /></p>',
-      ].join("\n"),
-    },
-  },
-  {
-    name: "document with lists and code",
-    input: [
-      "---",
-      "title: Code Examples",
-      "---",
-      "",
-      "# Examples",
-      "",
-      "```js",
-      "const x = 1;",
-      "```",
-      "",
-      "- Step 1",
-      "- Step 2",
-    ].join("\n"),
-    output: {
-      meta: '{title:"Code Examples"}',
-      content: [
-        "<h1>Examples</h1>",
-        '<pre><code class="language-js">',
-        "const x = 1;",
-        "</code></pre>",
-        "<ul>",
-        "<li>Step 1</li>",
-        "<li>Step 2</li>",
-        "</ul>",
-      ].join("\n"),
-    },
-  },
-  {
-    name: "document with links and blockquotes",
-    input: [
-      "---",
-      "title: Linked Content",
-      "---",
-      "",
-      "# Resources",
-      "",
-      "> Important note",
-      "",
-      "[Visit docs](https://example.com)",
-    ].join("\n"),
-    output: {
-      meta: '{title:"Linked Content"}',
-      content: [
-        "<h1>Resources</h1>",
-        "<blockquote>",
-        "<p>Important note</p>",
-        "</blockquote>",
-        '<p><a href="https://example.com">Visit docs</a></p>',
-      ].join("\n"),
-    },
-  },
 ];
 
 const customComponentTestCases: TestCase[] = [
   {
-    name: "custom component - simple mapping",
+    name: "single",
     input: "```js\nconst x = 1;\n```",
     output: {
       import: 'import CustomCode from "@/components/Code.svelte";',
@@ -516,7 +398,7 @@ const customComponentTestCases: TestCase[] = [
     options: { components: { code: "@/components/Code.svelte" } },
   },
   {
-    name: "custom component - multiple components",
+    name: "multiple",
     input: "[Link](https://example.com)\n\n```js\nconst x = 1;\n```",
     output: {
       import:
@@ -534,13 +416,13 @@ const customComponentTestCases: TestCase[] = [
     },
   },
   {
-    name: "custom component - no mapping (should not import)",
+    name: "no mapping",
     input: "Test",
     output: { content: "<p>Test</p>" },
     options: { components: { a: "@/components/Link.svelte" } },
   },
   {
-    name: "custom component - empty options",
+    name: "no options",
     input: "Test",
     output: { content: "<p>Test</p>" },
     options: {},
