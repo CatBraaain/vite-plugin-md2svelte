@@ -1,8 +1,12 @@
 import { compile } from "svelte/compiler";
-import { md2svelte } from "../src/vite-plugin-md2svelte.js";
+import { type Md2svelteOptions, md2svelte } from "../src/vite-plugin-md2svelte.js";
 
-export async function md2svelteString(md: string, id: string = "test.md"): Promise<string | null> {
-  const transform = md2svelte().transform! as (
+export async function md2svelteString(
+  md: string,
+  id: string = "test.md",
+  options: Md2svelteOptions = {},
+): Promise<string | null> {
+  const transform = md2svelte(options).transform! as (
     code: string,
     id: string,
   ) => Promise<

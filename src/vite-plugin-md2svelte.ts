@@ -10,7 +10,12 @@ import { visit } from "unist-util-visit";
 import type { Plugin } from "vite";
 import { rehypeSveltify } from "./rehype-sveltify";
 
-export function md2svelte(): Plugin {
+export interface Md2svelteOptions {
+  components?: Record<string, string>;
+}
+
+export function md2svelte(options: Md2svelteOptions = {}): Plugin {
+  const { components = {} } = options;
   return {
     name: "vite-plugin-md2svelte",
     async transform(code: string, id: string) {
@@ -23,7 +28,7 @@ export function md2svelte(): Plugin {
         .use(rehypeRaw)
         .use(exportMeta, frontmatter)
         .use(importImage)
-        // .use(importCustomComponent)
+        .use(customComponents, components)
         .use(rehypeSveltify)
         .process(content);
       return {
@@ -99,26 +104,32 @@ function importImage() {
   };
 }
 
-// function importCustomComponent() {
-//   return (tree: any) => {
-//     const scriptNode = getScriptNode(tree);
-//     const customComponents: Set<string> = new Set();
-//     visit(
-//       tree,
-//       {
-//         type: "element",
-//         tagName: "CodeBlock",
-//       },
-//       (node) => {
-//         customComponents.add("CodeBlock");
-//       },
-//     );
+function customComponents(components: Record<string, string>) {
+  return (tree: Root) => {
+    const usedComponents = new Set<string>();
 
-//     if (customComponents.size > 0) {
-//       scriptNode.children.push({
-//         type: "text",
-//         value: `import CodeBlock from "$lib/components/CodeBlock.svelte";`,
-//       } satisfies Text);
-//     }
-//   };
-// }
+    visit(tree, { type: "element" }, (node) => {
+      const elementNode = node as Element;
+      const importPath = components[elementNode.tagName];
+      if (importPath) {
+        usedComponents.add(elementNode.tagName);
+        elementNode.tagName = `Custom${capitalize(elementNode.tagName)}`;
+      }
+    });
+
+    if (usedComponents.size === 0) return;
+
+    const scriptNode = getScriptNode(tree);
+
+    const imports: string[] = [];
+    usedComponents.forEach((tagName) => {
+      const path = components[tagName];
+      imports.push(`\nimport Custom${capitalize(tagName)} from "${path}";`);
+    });
+    scriptNode.children.push({ type: "text", value: imports.join("") });
+  };
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

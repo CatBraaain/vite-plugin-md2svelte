@@ -8,6 +8,9 @@ type TestCase = {
   fileName?: string;
   input: string;
   output: Output | null;
+  options?: {
+    components?: Record<string, string>;
+  };
 };
 
 type Output = {
@@ -502,6 +505,48 @@ const integrationTestCases: TestCase[] = [
   },
 ];
 
+const customComponentTestCases: TestCase[] = [
+  {
+    name: "custom component - simple mapping",
+    input: "```js\nconst x = 1;\n```",
+    output: {
+      import: 'import CustomCode from "@/components/Code.svelte";',
+      content: '<pre><CustomCode class="language-js">const x = 1;\n</CustomCode></pre>',
+    },
+    options: { components: { code: "@/components/Code.svelte" } },
+  },
+  {
+    name: "custom component - multiple components",
+    input: "[Link](https://example.com)\n\n```js\nconst x = 1;\n```",
+    output: {
+      import:
+        'import CustomA from "@/components/Link.svelte";\nimport CustomCode from "@/components/Code.svelte";',
+      content: [
+        '<p><CustomA href="https://example.com">Link</CustomA></p>',
+        '<pre><CustomCode class="language-js">const x = 1;\n</CustomCode></pre>',
+      ].join("\n"),
+    },
+    options: {
+      components: {
+        a: "@/components/Link.svelte",
+        code: "@/components/Code.svelte",
+      },
+    },
+  },
+  {
+    name: "custom component - no mapping (should not import)",
+    input: "Test",
+    output: { content: "<p>Test</p>" },
+    options: { components: { a: "@/components/Link.svelte" } },
+  },
+  {
+    name: "custom component - empty options",
+    input: "Test",
+    output: { content: "<p>Test</p>" },
+    options: {},
+  },
+];
+
 export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Attributes", testCases: attributeTestCases },
   { groupName: "Text", testCases: textTestCases },
@@ -511,4 +556,5 @@ export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Frontmatter", testCases: frontmatterTestCases },
   { groupName: "Image", testCases: imageTestCases },
   { groupName: "Integration", testCases: integrationTestCases },
+  { groupName: "Custom Component", testCases: customComponentTestCases },
 ];
