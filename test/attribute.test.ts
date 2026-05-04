@@ -1,5 +1,5 @@
 import type { Properties } from "hast";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { serializeAttribute } from "../src/rehype-sveltify.js";
 
 type TestCase = {

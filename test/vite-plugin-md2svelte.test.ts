@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { testCaseGroups } from "./test-cases.ts";
 import { createScriptNodeString } from "./utils";
 import { md2svelteString, validateSvelteSyntax } from "./utils.js";

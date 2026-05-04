@@ -9,4 +9,9 @@ export default defineConfig({
       skipNodeModulesBundle: true,
     },
   },
+  test: {
+    coverage: {
+      exclude: ["test/**", "**/*.test.ts"],
+    },
+  },
 });
