@@ -62,7 +62,7 @@ export function compileChildren(parent: Parents): string {
 
 export function compileElement(node: Element): string {
   const attributes = Object.entries(node.properties)
-    .filter(([key, value]) => value !== null && value !== undefined)
+    .filter(([_, value]) => value !== null && value !== undefined)
     .map(([key, value]) => serializeAttribute(key, value as ValidValue))
     .filter(Boolean)
     .map((s) => ` ${s}`)

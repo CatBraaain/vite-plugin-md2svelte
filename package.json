@@ -2,38 +2,35 @@
   "name": "vite-plugin-md2svelte",
   "version": "0.0.0",
   "description": "A Vite plugin that converts Markdown files to Svelte components with frontmatter support, custom components, and plugin extensibility",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+  "keywords": [
+    "frontmatter",
+    "markdown",
+    "md",
+    "rehype",
+    "remark",
+    "svelte",
+    "vite",
+    "vite-plugin"
+  ],
+  "license": "MIT",
+  "author": "CatBraaain",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CatBraaain/vite-plugin-md2svelte.git"
   },
   "files": [
     "dist",
     "package.json",
     "README.md"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/CatBraaain/vite-plugin-md2svelte.git"
-  },
-  "keywords": [
-    "vite",
-    "vite-plugin",
-    "svelte",
-    "markdown",
-    "md",
-    "frontmatter",
-    "rehype",
-    "remark"
-  ],
-  "author": "CatBraaain",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "dependencies": {
     "devalue": "^5.8.0",
@@ -51,5 +48,8 @@
     "@types/hast": "^3.0.4",
     "svelte": "^5.55.5",
     "vite-plus": "^0.1.20"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
