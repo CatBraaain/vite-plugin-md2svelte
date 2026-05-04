@@ -21,9 +21,6 @@
         "svelte": "^5.55.5",
         "vite-plus": "^0.1.20",
       },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
     },
   },
   "packages": {
