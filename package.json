@@ -32,6 +32,11 @@
       "import": "./dist/index.js"
     }
   },
+  "scripts": {
+    "build": "vp pack",
+    "ci": "vp check",
+    "test": "vp test"
+  },
   "dependencies": {
     "devalue": "^5.8.0",
     "gray-matter": "^4.0.3",
