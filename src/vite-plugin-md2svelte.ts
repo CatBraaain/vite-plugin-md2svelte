@@ -9,29 +9,41 @@ import type { PluggableList } from "unified";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import type { Plugin } from "vite";
+import type { ZodType } from "zod";
+import { z } from "zod";
 import { rehypeSveltify } from "./rehype-sveltify";
 
 export interface Md2svelteOptions {
   components?: Record<string, string>;
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
+  frontmatterSchema?: ZodType;
 }
 
 export function md2svelte(options: Md2svelteOptions = {}): Plugin {
-  const { components = {}, remarkPlugins = [], rehypePlugins = [] } = options;
+  const {
+    components = {},
+    remarkPlugins = [],
+    rehypePlugins = [],
+    frontmatterSchema: schema,
+  } = options;
   return {
     name: "vite-plugin-md2svelte",
     async transform(code: string, id: string) {
       if (!id.endsWith(".md")) return;
 
       const { content, data: frontmatter } = matter(code);
+      const validatedFrontmatter = schema
+        ? validateFrontmatter(frontmatter, schema, id)
+        : frontmatter;
+
       const file = await unified()
         .use(remarkParse)
         .use(remarkPlugins)
         .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeRaw)
         .use(rehypePlugins)
-        .use(exportMeta, frontmatter)
+        .use(exportMeta, validatedFrontmatter)
         .use(importImage)
         .use(customComponents, components)
         .use(rehypeSveltify)
@@ -42,6 +54,14 @@ export function md2svelte(options: Md2svelteOptions = {}): Plugin {
       };
     },
   };
+}
+
+function validateFrontmatter(frontmatter: unknown, schema: ZodType, id: string) {
+  const result = schema.safeParse(frontmatter, { reportInput: true });
+  if (!result.success) {
+    throw new Error(`Frontmatter validation failed in ${id}\n${z.prettifyError(result.error)}`);
+  }
+  return result.data;
 }
 
 function getScriptNode(tree: Root): Element {

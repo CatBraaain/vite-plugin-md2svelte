@@ -1,5 +1,6 @@
-import type { PluggableList } from "unified";
+import type { Md2svelteOptions } from "../src/vite-plugin-md2svelte";
 import { visit } from "unist-util-visit";
+import { z } from "zod";
 
 type TestCaseGroup = {
   groupName: string;
@@ -10,15 +11,11 @@ type TestCase = {
   name: string;
   fileName?: string;
   input: string;
-  output: Output | null;
-  options?: {
-    components?: Record<string, string>;
-    remarkPlugins?: PluggableList;
-    rehypePlugins?: PluggableList;
-  };
+  output: Output | null | Error;
+  options?: Md2svelteOptions;
 };
 
-type Output = {
+export type Output = {
   meta?: string;
   import?: string;
   content?: string;
@@ -465,6 +462,127 @@ const pluginTestCases: TestCase[] = [
   },
 ];
 
+const zodSchemaTestCases: TestCase[] = [
+  {
+    name: "valid schema",
+    input: [
+      "---",
+      "title: Test Post",
+      "date: 2024-01-15",
+      "tags: [vite, svelte]",
+      "---",
+      "",
+      "# Content",
+    ].join("\n"),
+    output: {
+      meta: '{title:"Test Post",date:new Date(1705276800000),tags:["vite","svelte"]}',
+      content: "<h1>Content</h1>",
+    },
+    options: {
+      frontmatterSchema: z.object({
+        title: z.string(),
+        date: z.coerce.date(),
+        tags: z.array(z.string()),
+      }),
+    },
+  },
+  {
+    name: "invalid field",
+    input: ["---", "title: Test Post", "invalidField: value", "---", "", "# Content"].join("\n"),
+    output: new Error(
+      [
+        "Frontmatter validation failed in test.md",
+        "✖ Invalid input: expected date, received Date",
+        "  → at date",
+      ].join("\n"),
+    ),
+    options: {
+      frontmatterSchema: z.object({
+        title: z.string(),
+        date: z.coerce.date(),
+      }),
+    },
+  },
+  {
+    name: "invalid date",
+    input: ["---", "title: Test", "date: invalid-date", "---", "", "# Content"].join("\n"),
+    output: new Error(
+      [
+        "Frontmatter validation failed in test.md",
+        "✖ Invalid input: expected date, received Date",
+        "  → at date",
+        "✖ Invalid input: expected array, received undefined",
+        "  → at tags",
+      ].join("\n"),
+    ),
+    options: {
+      frontmatterSchema: z.object({
+        title: z.string(),
+        date: z.coerce.date(),
+        tags: z.array(z.string()),
+      }),
+    },
+  },
+  {
+    name: "no schema",
+    input: ["---", "title: Test Post", "date: 2024-01-15", "---", "", "# Content"].join("\n"),
+    output: {
+      meta: '{title:"Test Post",date:new Date(1705276800000)}',
+      content: "<h1>Content</h1>",
+    },
+    options: {},
+  },
+  {
+    name: "nested objects",
+    input: [
+      "---",
+      "title: Nested Test",
+      "meta:",
+      "  author: John Doe",
+      "  category: Testing",
+      "---",
+      "",
+      "# Content",
+    ].join("\n"),
+    output: {
+      meta: '{title:"Nested Test",meta:{author:"John Doe",category:"Testing"}}',
+      content: "<h1>Content</h1>",
+    },
+    options: {
+      frontmatterSchema: z.object({
+        title: z.string(),
+        meta: z.object({
+          author: z.string(),
+          category: z.string(),
+        }),
+      }),
+    },
+  },
+  {
+    name: "complex transformations",
+    input: [
+      "---",
+      "title: Complex Test",
+      "description: This is a description",
+      "count: 42",
+      "---",
+      "",
+      "# Content",
+    ].join("\n"),
+    output: {
+      meta: '{title:"Complex Test",description:"This is a description",count:42}',
+      content: "<h1>Content</h1>",
+    },
+    options: {
+      frontmatterSchema: z.object({
+        title: z.string(),
+        description: z.string(),
+        count: z.number().positive(),
+      }),
+    },
+  },
+];
+
 export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Attributes", testCases: attributeTestCases },
   { groupName: "Text", testCases: textTestCases },
@@ -476,4 +594,5 @@ export const testCaseGroups: TestCaseGroup[] = [
   { groupName: "Integration", testCases: integrationTestCases },
   { groupName: "Custom Component", testCases: customComponentTestCases },
   { groupName: "Plugin", testCases: pluginTestCases },
+  { groupName: "Zod Schema", testCases: zodSchemaTestCases },
 ];

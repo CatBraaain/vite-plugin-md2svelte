@@ -7,15 +7,20 @@ for (const testCaseGroup of testCaseGroups) {
   const { groupName, testCases } = testCaseGroup;
   describe(groupName, () => {
     it.each(testCases)("$name", async ({ input, fileName, output, options }) => {
+      if (output instanceof Error) {
+        await expect(md2svelteString(input, fileName, options)).rejects.toThrow(output);
+        return;
+      }
+
       const svelteString = await md2svelteString(input, fileName, options);
-      if (output !== null) {
+      if (output === null) {
+        expect(svelteString).toBe(output);
+      } else {
         expect(svelteString).toBe(
           createScriptNodeString({ meta: output.meta, import: output.import }) +
             (output.content ? `\n${output.content}` : ""),
         );
         expect(svelteString && validateSvelteSyntax(svelteString).isValid).toBe(true);
-      } else {
-        expect(svelteString).toBe(output);
       }
     });
   });
