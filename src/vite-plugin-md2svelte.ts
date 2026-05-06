@@ -17,7 +17,7 @@ export interface Md2svelteOptions {
   components?: Record<string, string>;
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
-  frontmatterSchema?: ZodType;
+  frontmatterSchema?: ZodType<unknown>;
 }
 
 export function md2svelte(options: Md2svelteOptions = {}): Plugin {
