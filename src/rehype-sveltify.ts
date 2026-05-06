@@ -52,7 +52,7 @@ export function compileChildren(parent: Parents): string {
           return node.value;
         }
         default: {
-          throw new Error(`Unsupported node type: ${node.type}`);
+          return "";
         }
       }
     })
