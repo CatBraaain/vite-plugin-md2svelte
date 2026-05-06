@@ -203,9 +203,7 @@ const markdownTestCases: TestCase[] = [
     name: "code block",
     input: '```js\nconsole.log("test");\n```',
     output: {
-      content: ['<pre><code class="language-js">', 'console.log("test");', "</code></pre>"].join(
-        "\n",
-      ),
+      content: ['<pre><code class="language-js">console.log("test");', "</code></pre>"].join("\n"),
     },
   },
 ];
