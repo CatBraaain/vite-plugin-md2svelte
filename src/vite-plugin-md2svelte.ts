@@ -11,6 +11,7 @@ import { visit } from "unist-util-visit";
 import type { Plugin } from "vite";
 import type { ZodType } from "zod";
 import { z } from "zod";
+
 import { rehypeSveltify } from "./rehype-sveltify";
 
 export interface Md2svelteOptions {

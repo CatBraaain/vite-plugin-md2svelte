@@ -1,4 +1,5 @@
 import { compile } from "svelte/compiler";
+
 import { type Md2svelteOptions, md2svelte } from "../src/vite-plugin-md2svelte.js";
 
 export async function md2svelteString(

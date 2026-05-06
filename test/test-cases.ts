@@ -1,6 +1,7 @@
-import type { Md2svelteOptions } from "../src/vite-plugin-md2svelte";
 import { visit } from "unist-util-visit";
 import { z } from "zod";
+
+import type { Md2svelteOptions } from "../src/vite-plugin-md2svelte";
 
 type TestCaseGroup = {
   groupName: string;
