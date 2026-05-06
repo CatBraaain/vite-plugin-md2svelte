@@ -141,7 +141,7 @@ function customComponents(_components: Record<string, string>) {
       const importPath = components[elementNode.tagName.toLowerCase()];
       if (importPath) {
         usedComponents.add(elementNode.tagName);
-        elementNode.tagName = `Custom${elementNode.tagName}`;
+        elementNode.tagName = `Custom${capitalize(elementNode.tagName)}`;
       }
     });
 
@@ -152,8 +152,12 @@ function customComponents(_components: Record<string, string>) {
     const imports: string[] = [];
     usedComponents.forEach((tagName) => {
       const path = components[tagName];
-      imports.push(`\nimport Custom${tagName} from "${path}";`);
+      imports.push(`\nimport Custom${capitalize(tagName)} from "${path}";`);
     });
     scriptNode.children.push({ type: "text", value: imports.join("") });
   };
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
