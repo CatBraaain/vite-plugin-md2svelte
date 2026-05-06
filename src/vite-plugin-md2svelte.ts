@@ -41,8 +41,8 @@ export function md2svelte(options: Md2svelteOptions = {}): Plugin {
         .use(remarkParse)
         .use(remarkPlugins)
         .use(remarkRehype, { allowDangerousHtml: true })
-        .use(rehypeRaw)
         .use(rehypePlugins)
+        .use(rehypeRaw)
         .use(exportMeta, validatedFrontmatter)
         .use(importImage)
         .use(customComponents, components)
@@ -129,13 +129,16 @@ function importImage() {
   };
 }
 
-function customComponents(components: Record<string, string>) {
+function customComponents(_components: Record<string, string>) {
+  const components = Object.fromEntries(
+    Object.entries(_components).map(([k, v]) => [k.toLowerCase(), v]),
+  );
   return (tree: Root) => {
     const usedComponents = new Set<string>();
 
     visit(tree, { type: "element" }, (node) => {
       const elementNode = node as Element;
-      const importPath = components[elementNode.tagName];
+      const importPath = components[elementNode.tagName.toLowerCase()];
       if (importPath) {
         usedComponents.add(elementNode.tagName);
         elementNode.tagName = `Custom${elementNode.tagName}`;
