@@ -89,6 +89,9 @@ export function compileElement(node: Element): string {
 export function serializeAttribute(_key: string, value: ValidValue): string {
   const key = _key.toLowerCase() === "classname" ? "class" : _key;
   if (key.startsWith("raw:")) {
+    if (typeof value !== "string") {
+      throw new Error(`Raw attribute "${key}" requires a string value, received ${typeof value}`);
+    }
     return `${key.slice("raw:".length)}=${value}`;
   }
 
