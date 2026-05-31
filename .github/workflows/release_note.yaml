@@ -1,0 +1,27 @@
+name: Generate Release Note
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  release_note:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install parse-changelog
+        uses: taiki-e/install-action@v2
+        with:
+          tool: parse-changelog
+      - name: Create GitHub Release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --notes "$(parse-changelog CHANGELOG.md "${GITHUB_REF_NAME#v}")" \
+            --title "$GITHUB_REF_NAME"
