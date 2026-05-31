@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-md2svelte",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A Vite plugin that converts Markdown files to Svelte components with frontmatter support, custom components, and plugin extensibility",
   "keywords": [
     "frontmatter",
