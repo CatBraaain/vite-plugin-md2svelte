@@ -51,6 +51,7 @@
     "@types/bun": "latest",
     "@types/hast": "^3.0.4",
     "svelte": "^5.55.5",
+    "typescript": "^6.0.3",
     "vite-plus": "^0.1.20",
     "zod": "^4.4.3"
   },
