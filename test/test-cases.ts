@@ -396,7 +396,7 @@ const customComponentTestCases: TestCase[] = [
       import: 'import CustomCode from "@/components/Code.svelte";',
       content: '<pre><CustomCode class="language-js">const x = 1;\n</CustomCode></pre>',
     },
-    options: { components: { code: "@/components/Code.svelte" } },
+    options: { customComponents: { code: "@/components/Code.svelte" } },
   },
   {
     name: "multiple",
@@ -410,7 +410,7 @@ const customComponentTestCases: TestCase[] = [
       ].join("\n"),
     },
     options: {
-      components: {
+      customComponents: {
         a: "@/components/Link.svelte",
         code: "@/components/Code.svelte",
       },
@@ -420,7 +420,7 @@ const customComponentTestCases: TestCase[] = [
     name: "no mapping",
     input: "Test",
     output: { content: "<p>Test</p>" },
-    options: { components: { a: "@/components/Link.svelte" } },
+    options: { customComponents: { a: "@/components/Link.svelte" } },
   },
   {
     name: "no options",

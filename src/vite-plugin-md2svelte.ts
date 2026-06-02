@@ -15,18 +15,18 @@ import { z } from "zod";
 import { rehypeSveltify } from "./rehype-sveltify";
 
 export interface Md2svelteOptions {
-  components?: Record<string, string>;
+  frontmatterSchema?: ZodType<unknown>;
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
-  frontmatterSchema?: ZodType<unknown>;
+  customComponents?: Record<string, string>;
 }
 
 export function md2svelte(options: Md2svelteOptions = {}): Plugin {
   const {
-    components = {},
+    frontmatterSchema: schema,
     remarkPlugins = [],
     rehypePlugins = [],
-    frontmatterSchema: schema,
+    customComponents = {},
   } = options;
   return {
     name: "vite-plugin-md2svelte",
@@ -46,7 +46,7 @@ export function md2svelte(options: Md2svelteOptions = {}): Plugin {
         .use(rehypeRaw)
         .use(exportMeta, validatedFrontmatter)
         .use(importImage)
-        .use(customComponents, components)
+        .use(mapCustomComponents, customComponents)
         .use(rehypeSveltify)
         .process(content);
       return {
@@ -130,9 +130,9 @@ function importImage() {
   };
 }
 
-function customComponents(_components: Record<string, string>) {
+function mapCustomComponents(customComponents: Record<string, string>) {
   const components = Object.fromEntries(
-    Object.entries(_components).map(([k, v]) => [k.toLowerCase(), v]),
+    Object.entries(customComponents).map(([k, v]) => [k.toLowerCase(), v]),
   );
   return (tree: Root) => {
     const usedComponents = new Set<string>();

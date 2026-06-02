@@ -104,7 +104,7 @@ import CustomBlockquote from "./src/components/CustomBlockquote.svelte";
 export default defineConfig({
   plugins: [
     md2svelte({
-      components: {
+      customComponents: {
         blockquote: "$lib/components/CustomBlockquote.svelte",
       },
     }),
@@ -182,8 +182,8 @@ Configuration options for the md2svelte plugin.
 
 ```typescript
 interface Md2svelteOptions {
-  /** Map of element names to custom component paths */
-  components?: Record<string, string>;
+  /** Zod schema for validating frontmatter */
+  frontmatterSchema?: ZodType;
 
   /** Custom remark plugins for markdown processing */
   remarkPlugins?: PluggableList;
@@ -191,7 +191,7 @@ interface Md2svelteOptions {
   /** Custom rehype plugins for HTML transformation */
   rehypePlugins?: PluggableList;
 
-  /** Zod schema for validating frontmatter */
-  frontmatterSchema?: ZodType;
+  /** Map of element names to custom component paths */
+  customComponents?: Record<string, string>;
 }
 ```
